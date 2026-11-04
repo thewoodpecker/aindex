@@ -101,6 +101,34 @@ input {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.nav-link {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  cursor: pointer;
+}
+
+.nav-link.is-current {
+  color: var(--text);
+}
+
+.logo-slot:focus-visible,
+.nav-link:focus-visible {
+  outline: 1px solid var(--text-subdued);
+  outline-offset: 3px;
 }
 
 .logo-rot {
@@ -164,6 +192,15 @@ input {
   font-weight: 500;
   line-height: 20px;
   letter-spacing: -0.15px;
+  transition: color 400ms cubic-bezier(0.22, 0.8, 0.28, 1);
+}
+
+.pill .percent {
+  color: inherit;
+  font-size: 1em;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.15px;
 }
 
 .diamond {
@@ -188,6 +225,10 @@ input {
 .diamond-cell,
 .diamond-bar {
   background: #ffffff;
+}
+
+.diamond-cell {
+  transition: background-color 400ms cubic-bezier(0.22, 0.8, 0.28, 1);
 }
 
 .diamond-bar {
@@ -577,6 +618,44 @@ input {
   background: var(--bg);
 }
 
+.score-screen {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.score-screen .topbar {
+  position: relative;
+  width: min(1280px, 100%);
+  margin-inline: auto;
+  flex: none;
+}
+
+.score-screen .studio {
+  flex: 1;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px 64px;
+}
+
+.score-screen .studio-col {
+  align-items: center;
+}
+
+.score-screen .score-actions,
+.score-screen .score-controls {
+  justify-content: center;
+  max-width: 100%;
+}
+
+.score-screen .score-actions {
+  width: min(776px, 100%);
+}
+
 .studio-col {
   width: min(776px, 100%);
   display: flex;
@@ -638,6 +717,135 @@ input {
   cursor: pointer;
 }
 
+/* The desktop hero is a 1280×832 frame. Narrower viewports reflow instead of scaling that frame. */
+@media (max-width: 1279px) {
+  .hero-scale {
+    height: auto;
+    display: block;
+  }
+
+  .hero-frame {
+    width: 100%;
+    height: auto;
+    transform: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 24px 72px;
+  }
+
+  .topbar {
+    position: relative;
+    width: 100%;
+    min-height: 51px;
+  }
+
+  .hero-frame .topbar {
+    padding: 0 0 8px;
+  }
+
+  .score-screen {
+    padding-top: 16px;
+  }
+
+  .score-screen .topbar {
+    width: 100%;
+    padding: 0 24px;
+  }
+
+  .logo-slot {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+  }
+
+  .nav-balance {
+    display: none;
+  }
+
+  .nav {
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    max-width: calc(50% - 40px);
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .copy,
+  .search {
+    position: static;
+    width: min(776px, 100%);
+    left: auto;
+    top: auto;
+  }
+
+  .copy {
+    margin-top: 56px;
+  }
+
+  .search {
+    margin-top: 28px;
+  }
+
+  .score-screen .studio {
+    padding: 32px 24px 56px;
+  }
+}
+
+@media (max-width: 719px) {
+  .hero-frame {
+    padding: 16px 20px 56px;
+  }
+
+  .topbar,
+  .hero-frame .topbar,
+  .score-screen .topbar {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    min-height: 0;
+  }
+
+  .hero-frame .topbar,
+  .score-screen .topbar {
+    padding-bottom: 0;
+  }
+
+  .score-screen .topbar {
+    padding-inline: 20px;
+  }
+
+  .logo-slot {
+    position: static;
+    transform: none;
+    order: -1;
+  }
+
+  .nav {
+    max-width: none;
+    justify-content: center;
+    gap: 10px 18px;
+  }
+
+  .copy {
+    margin-top: 40px;
+  }
+
+  .search {
+    margin-top: 24px;
+    padding-left: 20px;
+  }
+
+  .search input {
+    font-size: 16px;
+  }
+
+  .score-screen .studio {
+    padding: 28px 20px 48px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mark.is-live .cell,
   .mark.is-live .score-bar,
@@ -653,7 +861,9 @@ input {
     animation: none;
   }
 
-  .digit-slot {
+  .digit-slot,
+  .pill,
+  .diamond-cell {
     transition: none;
   }
 }

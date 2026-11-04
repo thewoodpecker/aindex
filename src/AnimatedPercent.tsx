@@ -6,6 +6,8 @@ export const STAGGER_MS = 40;
 type AnimatedPercentProps = {
   text: string;
   direction: 1 | -1;
+  /** When false, show the first value immediately. Later changes still animate. */
+  enter?: boolean;
 };
 
 function prefersReducedMotion(): boolean {
@@ -57,10 +59,10 @@ function animationMs(from: string, to: string): number {
   return DURATION_MS + Math.max(0, changes - 1) * STAGGER_MS;
 }
 
-export function AnimatedPercent({ text, direction }: AnimatedPercentProps) {
+export function AnimatedPercent({ text, direction, enter = true }: AnimatedPercentProps) {
   const reduced = usePrefersReducedMotion();
   const [shown, setShown] = useState(text);
-  const [from, setFrom] = useState<string | null>(prefersReducedMotion() ? null : "");
+  const [from, setFrom] = useState<string | null>(!enter || prefersReducedMotion() ? null : "");
 
   if (text !== shown) {
     setFrom(reduced ? null : shown);
