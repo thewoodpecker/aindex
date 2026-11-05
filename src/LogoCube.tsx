@@ -8,7 +8,10 @@ const TOP_CELLS = [
 ] as const;
 
 const SPIN_MS = 12000;
+const AUTO_DEG_PER_MS = 360 / SPIN_MS;
 const DRAG_DEG_PER_PX = 0.65;
+const FLING_LIMIT = 1.4;
+const FLING_EASE_MS = 600;
 
 // NDEX outlines from the navbar logo, in the logo's own coordinates.
 const NDEX_PATH =
@@ -22,9 +25,11 @@ export function LogoCube() {
   const sceneRef = useRef<HTMLDivElement>(null);
   const cubeRef = useRef<HTMLDivElement>(null);
   const yaw = useRef(0);
+  const velocity = useRef(AUTO_DEG_PER_MS);
   const dragging = useRef(false);
   const reduced = useRef(false);
   const lastX = useRef(0);
+  const lastMoveAt = useRef(0);
 
   useLayoutEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -39,10 +44,12 @@ export function LogoCube() {
 
     const clock = { last: performance.now(), frame: 0 };
     const tick = (now: number) => {
-      const dt = now - clock.last;
+      const dt = Math.min(now - clock.last, 48);
       clock.last = now;
       if (!dragging.current && !reduced.current) {
-        yaw.current += (360 / SPIN_MS) * dt;
+        yaw.current += velocity.current * dt;
+        const blend = 1 - Math.exp(-dt / FLING_EASE_MS);
+        velocity.current += (AUTO_DEG_PER_MS - velocity.current) * blend;
       }
       if (cubeRef.current) {
         cubeRef.current.style.transform = cubeTransform(yaw.current);
@@ -64,7 +71,9 @@ export function LogoCube() {
       return;
     }
     dragging.current = true;
+    velocity.current = 0;
     lastX.current = event.clientX;
+    lastMoveAt.current = performance.now();
     event.currentTarget.classList.add("is-dragging");
     event.currentTarget.setPointerCapture(event.pointerId);
   }
@@ -73,15 +82,27 @@ export function LogoCube() {
     if (!dragging.current) {
       return;
     }
+    const now = performance.now();
     const dx = event.clientX - lastX.current;
+    const dt = now - lastMoveAt.current;
     lastX.current = event.clientX;
-    yaw.current += dx * DRAG_DEG_PER_PX;
+    lastMoveAt.current = now;
+    const delta = dx * DRAG_DEG_PER_PX;
+    yaw.current += delta;
+    if (dt > 0) {
+      const sample = delta / dt;
+      velocity.current = dt < 80 ? velocity.current * 0.35 + sample * 0.65 : sample;
+    }
   }
 
   function endDrag(event: React.PointerEvent<HTMLDivElement>) {
     if (!dragging.current) {
       return;
     }
+    if (performance.now() - lastMoveAt.current > 60) {
+      velocity.current = 0;
+    }
+    velocity.current = Math.max(-FLING_LIMIT, Math.min(FLING_LIMIT, velocity.current));
     dragging.current = false;
     event.currentTarget.classList.remove("is-dragging");
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
