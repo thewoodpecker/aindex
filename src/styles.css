@@ -889,7 +889,8 @@ input {
   inset: 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  /* Logo: three squares on top, one block filling the rest. */
+  grid-template-rows: 1fr 2fr;
   gap: 5px;
   padding: 5px;
   background: #1e2632;
@@ -904,6 +905,13 @@ input {
   font-size: 16px;
   font-weight: 700;
   line-height: 1;
+}
+
+.logo-cube-bar {
+  grid-column: 1 / -1;
+  font-size: 18px;
+  letter-spacing: 0.18em;
+  padding-left: 0.18em;
 }
 
 .logo-cube-face.right .logo-cube-cell {
