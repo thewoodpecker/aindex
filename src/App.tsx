@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import logoUrl from "./assets/logo.svg";
 import searchUrl from "./assets/search.svg";
 import { AnimatedPercent } from "./AnimatedPercent";
+import { LogoCube } from "./LogoCube";
 import { ScoreMark } from "./ScoreMark";
 import { SCORE_PERCENTS, SCORE_STATES, stateForPercent, type ScorePercent, type ScoreState } from "./scores";
 
@@ -169,6 +170,7 @@ function ScoreStudio() {
           Replay
         </button>
       </div>
+      <LogoCube />
     </div>
   );
 }

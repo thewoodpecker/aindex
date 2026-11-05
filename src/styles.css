@@ -867,3 +867,97 @@ input {
     transition: none;
   }
 }
+
+.logo-cube-scene {
+  width: 168px;
+  height: 168px;
+  display: grid;
+  place-items: center;
+  perspective: 640px;
+}
+
+.logo-cube {
+  width: 102px;
+  height: 102px;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: logo-cube-spin 12s linear infinite;
+}
+
+.logo-cube-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 5px;
+  padding: 5px;
+  background: #1e2632;
+  backface-visibility: hidden;
+}
+
+.logo-cube-cell {
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  color: #1e2632;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.logo-cube-face.right .logo-cube-cell {
+  background: #f0f1f4;
+}
+
+.logo-cube-face.left .logo-cube-cell {
+  background: #e4e6eb;
+}
+
+.logo-cube-face.back .logo-cube-cell {
+  background: #eceef2;
+}
+
+.logo-cube-face.bottom .logo-cube-cell {
+  background: #d5d8df;
+}
+
+.logo-cube-face.front {
+  transform: translateZ(51px);
+}
+
+.logo-cube-face.back {
+  transform: rotateY(180deg) translateZ(51px);
+}
+
+.logo-cube-face.right {
+  transform: rotateY(90deg) translateZ(51px);
+}
+
+.logo-cube-face.left {
+  transform: rotateY(-90deg) translateZ(51px);
+}
+
+.logo-cube-face.top {
+  transform: rotateX(90deg) translateZ(51px);
+}
+
+.logo-cube-face.bottom {
+  transform: rotateX(-90deg) translateZ(51px);
+}
+
+@keyframes logo-cube-spin {
+  from {
+    transform: rotateX(-18deg) rotateY(0deg);
+  }
+  to {
+    transform: rotateX(-18deg) rotateY(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-cube {
+    animation: none;
+    transform: rotateX(-18deg) rotateY(-32deg);
+  }
+}
