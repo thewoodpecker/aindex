@@ -926,19 +926,31 @@ input {
   height: 100%;
 }
 
-.logo-cube-face.right .logo-cube-cell {
+.logo-cube-cell.is-green {
+  background: var(--positive);
+}
+
+.logo-cube-cell.is-amber {
+  background: var(--warning);
+}
+
+.logo-cube-cell.is-coral {
+  background: var(--error);
+}
+
+.logo-cube-face.right .logo-cube-bar {
   background: #f0f1f4;
 }
 
-.logo-cube-face.left .logo-cube-cell {
+.logo-cube-face.left .logo-cube-bar {
   background: #e4e6eb;
 }
 
-.logo-cube-face.back .logo-cube-cell {
+.logo-cube-face.back .logo-cube-bar {
   background: #eceef2;
 }
 
-.logo-cube-face.bottom .logo-cube-cell {
+.logo-cube-face.bottom .logo-cube-bar {
   background: #d5d8df;
 }
 
@@ -968,16 +980,16 @@ input {
 
 @keyframes logo-cube-spin {
   from {
-    transform: rotateX(-18deg) rotateY(0deg) rotateZ(-45deg);
+    transform: rotateX(-18deg) rotateY(0deg) rotateZ(-22deg);
   }
   to {
-    transform: rotateX(-18deg) rotateY(360deg) rotateZ(-45deg);
+    transform: rotateX(-18deg) rotateY(360deg) rotateZ(-22deg);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .logo-cube {
     animation: none;
-    transform: rotateX(-18deg) rotateY(-32deg) rotateZ(-45deg);
+    transform: rotateX(-18deg) rotateY(-32deg) rotateZ(-22deg);
   }
 }

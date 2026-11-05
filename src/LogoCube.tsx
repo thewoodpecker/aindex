@@ -1,5 +1,9 @@
 const FACES = ["front", "back", "right", "left", "top", "bottom"] as const;
-const TOP_CELLS = ["A", "I", ""] as const;
+const TOP_CELLS = [
+  { letter: "A", tone: "green" },
+  { letter: "I", tone: "amber" },
+  { letter: "", tone: "coral" },
+] as const;
 
 // NDEX outlines from the navbar logo, in the logo's own coordinates.
 const NDEX_PATH =
@@ -12,9 +16,9 @@ export function LogoCube() {
         <div className="logo-cube">
           {FACES.map((face) => (
             <div key={face} className={`logo-cube-face ${face}`}>
-              {TOP_CELLS.map((letter, index) => (
-                <span key={index} className="logo-cube-cell">
-                  {letter}
+              {TOP_CELLS.map((cell) => (
+                <span key={cell.tone} className={`logo-cube-cell is-${cell.tone}`}>
+                  {cell.letter}
                 </span>
               ))}
               <span className="logo-cube-cell logo-cube-bar">
