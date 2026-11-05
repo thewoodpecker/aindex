@@ -873,8 +873,15 @@ input {
   height: 188px;
   display: grid;
   place-items: center;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
   /* Near-plane distance used only so the orthographic rig below can cancel foreshortening. */
   perspective: 1000px;
+}
+
+.logo-cube-scene.is-dragging {
+  cursor: grabbing;
 }
 
 .logo-cube-camera {
@@ -888,7 +895,7 @@ input {
   height: 102px;
   position: relative;
   transform-style: preserve-3d;
-  animation: logo-cube-spin 12s linear infinite;
+  transform: rotateX(-18deg) rotateY(0deg) rotateZ(-22deg);
 }
 
 .logo-cube-face {
@@ -978,18 +985,8 @@ input {
   transform: rotateX(-90deg) translateZ(51px);
 }
 
-@keyframes logo-cube-spin {
-  from {
-    transform: rotateX(-18deg) rotateY(0deg) rotateZ(-22deg);
-  }
-  to {
-    transform: rotateX(-18deg) rotateY(360deg) rotateZ(-22deg);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .logo-cube {
-    animation: none;
     transform: rotateX(-18deg) rotateY(-32deg) rotateZ(-22deg);
   }
 }
