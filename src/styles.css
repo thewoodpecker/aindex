@@ -869,11 +869,18 @@ input {
 }
 
 .logo-cube-scene {
-  width: 168px;
-  height: 168px;
+  width: 188px;
+  height: 188px;
   display: grid;
   place-items: center;
-  perspective: 640px;
+  /* Near-plane distance used only so the orthographic rig below can cancel foreshortening. */
+  perspective: 1000px;
+}
+
+.logo-cube-camera {
+  transform-style: preserve-3d;
+  /* Push the cube far away and scale X/Y back. Depth no longer changes size, so the camera is orthographic. */
+  transform: scale3d(21, 21, 1) translateZ(-20000px);
 }
 
 .logo-cube {
@@ -909,9 +916,14 @@ input {
 
 .logo-cube-bar {
   grid-column: 1 / -1;
-  font-size: 18px;
-  letter-spacing: 0.18em;
-  padding-left: 0.18em;
+  place-items: stretch;
+  color: #1e2632;
+}
+
+.logo-cube-ndex {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .logo-cube-face.right .logo-cube-cell {
@@ -956,16 +968,16 @@ input {
 
 @keyframes logo-cube-spin {
   from {
-    transform: rotateX(-18deg) rotateY(0deg);
+    transform: rotateX(-18deg) rotateY(0deg) rotateZ(-45deg);
   }
   to {
-    transform: rotateX(-18deg) rotateY(360deg);
+    transform: rotateX(-18deg) rotateY(360deg) rotateZ(-45deg);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .logo-cube {
     animation: none;
-    transform: rotateX(-18deg) rotateY(-32deg);
+    transform: rotateX(-18deg) rotateY(-32deg) rotateZ(-45deg);
   }
 }
