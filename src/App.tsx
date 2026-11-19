@@ -1,35 +1,98 @@
 import { useEffect, useState } from "react";
 import { CubeMorph } from "./CubeMorph";
-import { LogoCube } from "./LogoCube";
+import { SoftBlurText } from "./LoadReveal";
+import { PluginDetail } from "./PluginDetail";
 import { PluginGrid } from "./PluginGrid";
-import { ScoreMark } from "./ScoreMark";
-import { SCORE_PERCENTS, stateForPercent, type ScorePercent } from "./scores";
+import { findPlugin } from "./plugins";
 
-const REVEAL_MS = 7140;
+const PLUGIN_PARAM = "plugin";
 
-type View = "home" | "score";
+function pluginNameFromUrl() {
+  const name = new URLSearchParams(window.location.search).get(PLUGIN_PARAM);
+  if (!name || !findPlugin(name)) {
+    return null;
+  }
+  return name;
+}
+
+function urlForPlugin(name: string | null) {
+  const url = new URL(window.location.href);
+  if (name) {
+    url.searchParams.set(PLUGIN_PARAM, name);
+  } else {
+    url.searchParams.delete(PLUGIN_PARAM);
+  }
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
+function currentUrl() {
+  return `${window.location.pathname}${window.location.search}${window.location.hash}`;
+}
 
 export default function App() {
-  const [view, setView] = useState<View>("home");
+  const [open, setOpen] = useState<string | null>(pluginNameFromUrl);
 
-  return view === "score" ? (
-    <ScoreScreen onHome={() => setView("home")} onScore={() => setView("score")} />
-  ) : (
-    <HomeScreen onHome={() => setView("home")} onScore={() => setView("score")} />
+  useEffect(() => {
+    const raw = new URLSearchParams(window.location.search).get(PLUGIN_PARAM);
+    if (raw && !findPlugin(raw)) {
+      history.replaceState(history.state, "", urlForPlugin(null));
+    }
+
+    const onPopState = () => {
+      setOpen(pluginNameFromUrl());
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  function openPlugin(name: string) {
+    if (!findPlugin(name)) {
+      return;
+    }
+    setOpen(name);
+    const next = urlForPlugin(name);
+    if (currentUrl() !== next) {
+      history.pushState({ prongPlugin: name }, "", next);
+    }
+  }
+
+  function closePlugin() {
+    setOpen(null);
+    const next = urlForPlugin(null);
+    if (currentUrl() !== next) {
+      history.replaceState(null, "", next);
+    }
+  }
+
+  return (
+    <>
+      <div className={open ? "screen-hidden" : undefined}>
+        <HomeScreen onOpen={openPlugin} />
+      </div>
+      {open ? <PluginDetail name={open} onBack={closePlugin} /> : null}
+    </>
   );
 }
 
-function HomeScreen({ onHome, onScore }: { onHome: () => void; onScore: () => void }) {
+function HomeScreen({ onOpen }: { onOpen: (name: string) => void }) {
   const [query, setQuery] = useState("");
+  const [intro, setIntro] = useState(true);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setIntro(false), 4000);
+    return () => window.clearTimeout(timeout);
+  }, []);
 
   return (
     <div className="hero-slot">
-      <Topbar view="home" onHome={onHome} onScore={onScore} />
+      <Topbar intro={intro} onHome={() => window.scrollTo(0, 0)} />
       <div className="hero-scale">
         <div className="hero-frame">
           <div className="copy">
-            <h1>Prong: The Universal Plugin Directory</h1>
-            <p className="lede">
+            <h1>
+              <SoftBlurText text="Prong: The Universal Plugin Directory" play={intro} />
+            </h1>
+            <p className={intro ? "lede load-reveal" : "lede"} style={intro ? { animationDelay: "0.3s" } : undefined}>
               Every plugin gets a free listing of its interfaces, skills, and checks.
               <br />
               Claim it for free, or pay for managed submission to every major directory.
@@ -37,7 +100,8 @@ function HomeScreen({ onHome, onScore }: { onHome: () => void; onScore: () => vo
           </div>
 
           <form
-            className="search"
+            className={intro ? "search load-reveal" : "search"}
+            style={intro ? { animationDelay: "0.45s" } : undefined}
             role="search"
             onClick={(event) => {
               if (event.target instanceof Element && event.target.closest("button")) {
@@ -67,17 +131,17 @@ function HomeScreen({ onHome, onScore }: { onHome: () => void; onScore: () => vo
               </svg>
             </button>
           </form>
-          <PluginGrid query={query} />
+          <PluginGrid query={query} intro={intro} onOpen={onOpen} />
         </div>
       </div>
-      <SiteFooter />
+      <SiteFooter intro={intro} />
     </div>
   );
 }
 
-function SiteFooter() {
+function SiteFooter({ intro = false }: { intro?: boolean }) {
   return (
-    <footer className="site-footer">
+    <footer className={intro ? "site-footer load-reveal" : "site-footer"} style={intro ? { animationDelay: "0.66s" } : undefined}>
       <div className="footer-brand">
         <CubeMorph className="footer-cube" />
         <div>
@@ -109,108 +173,21 @@ function SiteFooter() {
   );
 }
 
-function ScoreScreen({ onHome, onScore }: { onHome: () => void; onScore: () => void }) {
+function Topbar({ intro, onHome }: { intro: boolean; onHome: () => void }) {
   return (
-    <div className="score-screen">
-      <Topbar view="score" onHome={onHome} onScore={onScore} />
-      <section className="studio" aria-label="Directory">
-        <h1 className="sr-only">Directory</h1>
-        <ScoreStudio />
-      </section>
-    </div>
-  );
-}
-
-function ScoreStudio() {
-  const [percent, setPercent] = useState<ScorePercent>(85);
-  const [direction, setDirection] = useState<1 | -1>(1);
-  const [phase, setPhase] = useState<"loading" | "ready">("loading");
-  const [reveal, setReveal] = useState(0);
-  const visual = stateForPercent(percent);
-
-  useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timeout = window.setTimeout(() => setPhase("ready"), reduced ? 0 : REVEAL_MS);
-    return () => window.clearTimeout(timeout);
-  }, [reveal]);
-
-  function chooseScore(next: ScorePercent) {
-    if (next === percent) {
-      return;
-    }
-    setDirection(next > percent ? 1 : -1);
-    setPercent(next);
-  }
-
-  function replay() {
-    setPhase("loading");
-    setReveal((value) => value + 1);
-  }
-
-  return (
-    <div className="studio-col">
-      <ScoreMark
-        score={visual}
-        label={`${percent}%`}
-        size={48.083 * 3}
-        animate
-        direction={direction}
-        phase={phase}
-        playId={reveal}
-      />
-      <div className="score-actions">
-        <div className="score-controls" role="group" aria-label="Choose a score">
-          {SCORE_PERCENTS.map((value) => {
-            const pressed = value === percent;
-            return (
-              <button
-                key={value}
-                type="button"
-                aria-pressed={pressed}
-                className={pressed ? "score-choice is-selected" : "score-choice"}
-                style={pressed ? { color: stateForPercent(value).accent } : undefined}
-                onClick={() => chooseScore(value)}
-              >
-                {value}%
-              </button>
-            );
-          })}
-        </div>
-        <button type="button" className="score-replay" onClick={replay}>
-          Replay
-        </button>
-      </div>
-      <LogoCube />
-    </div>
-  );
-}
-
-function Topbar({ view, onHome, onScore }: { view: View; onHome: () => void; onScore: () => void }) {
-  const onScoreView = view === "score";
-
-  return (
-    <header className="topbar">
+    <header className={intro ? "topbar load-reveal" : "topbar"}>
       <nav className="nav" aria-label="Primary">
         <span>Plugins</span>
         <span>Agents</span>
         <span>Pricing</span>
-        <button
-          type="button"
-          className={onScoreView ? "nav-link is-current" : "nav-link"}
-          aria-current={onScoreView ? "page" : undefined}
-          onClick={onScore}
-        >
-          Directory
-        </button>
       </nav>
-      <button type="button" className="logo-slot" onClick={onHome} aria-label="Prong home">
+      <button type="button" className="logo-slot" aria-label="Prong home" onClick={onHome}>
         <CubeMorph playEvery={10} />
       </button>
       <div className="nav nav-balance" aria-hidden="true">
         <span>Plugins</span>
         <span>Agents</span>
         <span>Pricing</span>
-        <span>Directory</span>
       </div>
     </header>
   );
