@@ -1,101 +1,111 @@
 import { useEffect, useState } from "react";
-import logoUrl from "./assets/logo.svg";
-import searchUrl from "./assets/search.svg";
-import { AnimatedPercent } from "./AnimatedPercent";
+import { CubeMorph } from "./CubeMorph";
 import { LogoCube } from "./LogoCube";
+import { PluginGrid } from "./PluginGrid";
 import { ScoreMark } from "./ScoreMark";
-import { SCORE_PERCENTS, SCORE_STATES, stateForPercent, type ScorePercent, type ScoreState } from "./scores";
+import { SCORE_PERCENTS, stateForPercent, type ScorePercent } from "./scores";
 
-const PILL_INTERVAL_MS = 3000;
 const REVEAL_MS = 7140;
 
 type View = "home" | "score";
 
 export default function App() {
   const [view, setView] = useState<View>("home");
-  const pill = useCyclingPill();
 
   return view === "score" ? (
     <ScoreScreen onHome={() => setView("home")} onScore={() => setView("score")} />
   ) : (
-    <HomeScreen pill={pill} onHome={() => setView("home")} onScore={() => setView("score")} />
+    <HomeScreen onHome={() => setView("home")} onScore={() => setView("score")} />
   );
 }
 
-function useCyclingPill(): { score: ScoreState; direction: 1 | -1 } {
-  const [pill, setPill] = useState<{ index: number; direction: 1 | -1 }>({
-    index: 0,
-    direction: -1,
-  });
-
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      setPill((current) => {
-        const index = (current.index + 1) % SCORE_STATES.length;
-        const direction = SCORE_STATES[index].value > SCORE_STATES[current.index].value ? 1 : -1;
-        return { index, direction };
-      });
-    }, PILL_INTERVAL_MS);
-    return () => window.clearInterval(interval);
-  }, []);
-
-  return { score: SCORE_STATES[pill.index], direction: pill.direction };
-}
-
-function HomeScreen({
-  pill,
-  onHome,
-  onScore,
-}: {
-  pill: { score: ScoreState; direction: 1 | -1 };
-  onHome: () => void;
-  onScore: () => void;
-}) {
+function HomeScreen({ onHome, onScore }: { onHome: () => void; onScore: () => void }) {
   const [query, setQuery] = useState("");
 
   return (
     <div className="hero-slot">
+      <Topbar view="home" onHome={onHome} onScore={onScore} />
       <div className="hero-scale">
         <div className="hero-frame">
-          <Topbar view="home" onHome={onHome} onScore={onScore} />
-
           <div className="copy">
-            <h1>AIndex: The App Directory for Agents</h1>
+            <h1>Prong: The Universal Plugin Directory</h1>
             <p className="lede">
-              Apps get a free listing with AIndex® score{" "}
-              <span className="pill" style={{ color: pill.score.accent }}>
-                <DiamondMark accent={pill.score.accent} activeCell={pill.score.activeCell} />
-                <AnimatedPercent text={pill.score.label} direction={pill.direction} enter={false} />
-              </span>{" "}
-              and real-time agent reviews.
+              Every plugin gets a free listing of its interfaces, skills, and checks.
               <br />
-              Agents get a free directory of verified connections and tested skills.
+              Claim it for free, or pay for managed submission to every major directory.
             </p>
           </div>
 
           <form
             className="search"
             role="search"
+            onClick={(event) => {
+              if (event.target instanceof Element && event.target.closest("button")) {
+                return;
+              }
+              event.currentTarget.querySelector("input")?.focus();
+            }}
             onSubmit={(event) => {
               event.preventDefault();
             }}
           >
             <label className="sr-only" htmlFor="search">
-              Search AIndex
+              Search plugins
             </label>
             <input
               id="search"
               value={query}
-              placeholder="Search AIndex..."
+              placeholder="Search plugins..."
               onChange={(event) => setQuery(event.target.value)}
             />
-            <button type="submit" aria-label="Search">
-              <img src={searchUrl} alt="" />
+            <button type="submit" aria-label="Search" className={query.trim() ? "is-ready" : undefined}>
+              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M6.5 1.5C9.26142 1.5 11.5 3.73858 11.5 6.5C11.5 7.51906 11.1944 8.46641 10.6709 9.25684L14.207 12.793C14.5976 13.1835 14.5976 13.8165 14.207 14.207C13.8165 14.5976 13.1835 14.5976 12.793 14.207L9.25684 10.6709C8.46641 11.1944 7.51906 11.5 6.5 11.5C3.73858 11.5 1.5 9.26142 1.5 6.5C1.5 3.73858 3.73858 1.5 6.5 1.5ZM6.5 3.5C4.84315 3.5 3.5 4.84315 3.5 6.5C3.5 8.15685 4.84315 9.5 6.5 9.5C8.15685 9.5 9.5 8.15685 9.5 6.5C9.5 4.84315 8.15685 3.5 6.5 3.5Z"
+                />
+              </svg>
             </button>
           </form>
+          <PluginGrid query={query} />
         </div>
       </div>
+      <SiteFooter />
     </div>
+  );
+}
+
+function SiteFooter() {
+  return (
+    <footer className="site-footer">
+      <div className="footer-brand">
+        <CubeMorph className="footer-cube" />
+        <div>
+          <p className="footer-name">Prong</p>
+          <p className="footer-detail">The universal plugin directory. Free listings, with managed submission to every major directory.</p>
+        </div>
+      </div>
+      <div className="footer-end">
+        <p className="footer-copy">© 2026 Prong</p>
+        <ul className="footer-social">
+          <li>
+            <a href="https://x.com" aria-label="Prong on X">
+              X
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com" aria-label="Prong on GitHub">
+              GitHub
+            </a>
+          </li>
+          <li>
+            <a href="https://www.linkedin.com" aria-label="Prong on LinkedIn">
+              LinkedIn
+            </a>
+          </li>
+        </ul>
+      </div>
+    </footer>
   );
 }
 
@@ -103,8 +113,8 @@ function ScoreScreen({ onHome, onScore }: { onHome: () => void; onScore: () => v
   return (
     <div className="score-screen">
       <Topbar view="score" onHome={onHome} onScore={onScore} />
-      <section className="studio" aria-label="Score">
-        <h1 className="sr-only">Score</h1>
+      <section className="studio" aria-label="Directory">
+        <h1 className="sr-only">Directory</h1>
         <ScoreStudio />
       </section>
     </div>
@@ -181,46 +191,28 @@ function Topbar({ view, onHome, onScore }: { view: View; onHome: () => void; onS
   return (
     <header className="topbar">
       <nav className="nav" aria-label="Primary">
-        <span>Network</span>
-        <span>Method</span>
-        <span>Developers</span>
+        <span>Plugins</span>
+        <span>Agents</span>
+        <span>Pricing</span>
         <button
           type="button"
           className={onScoreView ? "nav-link is-current" : "nav-link"}
           aria-current={onScoreView ? "page" : undefined}
           onClick={onScore}
         >
-          Score
+          Directory
         </button>
       </nav>
-      <button type="button" className="logo-slot" onClick={onHome} aria-label="AIndex home">
-        <span className="logo-rot">
-          <img src={logoUrl} alt="" />
-        </span>
+      <button type="button" className="logo-slot" onClick={onHome} aria-label="Prong home">
+        <CubeMorph playEvery={10} />
       </button>
       <div className="nav nav-balance" aria-hidden="true">
-        <span>Network</span>
-        <span>Method</span>
-        <span>Developers</span>
-        <span>Score</span>
+        <span>Plugins</span>
+        <span>Agents</span>
+        <span>Pricing</span>
+        <span>Directory</span>
       </div>
     </header>
   );
 }
 
-function DiamondMark({ accent, activeCell }: { accent: string; activeCell: number }) {
-  return (
-    <span className="diamond" aria-hidden="true">
-      <span className="diamond-rot">
-        {[0, 1, 2].map((cell) => (
-          <span
-            key={cell}
-            className="diamond-cell"
-            style={{ backgroundColor: cell === activeCell ? accent : "#ffffff" }}
-          />
-        ))}
-        <span className="diamond-bar" />
-      </span>
-    </span>
-  );
-}
